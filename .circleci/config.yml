@@ -2,12 +2,15 @@ version: 2.1
 
 orbs:
   docker: circleci/docker@0.5.2
-  helm: perxtech/helm-deploy@0.0.4
+  helm-deploy: perxtech/helm-deploy@0.0.4
 
 workflows:
   build-deploy-pipeline:
     jobs:
       - build-push-image
+      - deploy
+          requires:
+            - build-push-image
 
 jobs:
   build-push-image:
@@ -19,7 +22,12 @@ jobs:
           image: naceflabidi/graphql-sample
       - docker/push:
           image: naceflabidi/graphql-sample
-      - helm/configure-kubectl
-      - helm/deploy:
+
+  deploy:
+    executor: helm-deploy/default
+    steps:
+      - helm-deploy/configure-kubectl
+      - helm-deploy/deploy:
           helm_release: graphql
           helm_chart: ./helm/graphql
+          helm_values: image.tag=$CIRCLE_SHA1
