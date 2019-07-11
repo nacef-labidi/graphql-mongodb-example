@@ -11,7 +11,8 @@ workflows:
 
 jobs:
   build-push-image:
-    executor: docker/machine
+    docker:
+      - image: docker:stable
     steps:
       - checkout
       - docker/check
@@ -20,6 +21,7 @@ jobs:
       - docker/push:
           image: naceflabidi/graphql-sample
       - helm/configure-kubectl
+
       - helm/deploy:
           helm_release: graphql
           helm_chart: ./helm/graphql
