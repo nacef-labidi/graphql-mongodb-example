@@ -1,0 +1,25 @@
+version: 2.1
+
+orbs:
+  docker: circleci/docker@0.5.2
+  helm: perxtech/helm-deploy@0.0.4
+
+workflows:
+  build-deploy-pipeline:
+    jobs:
+      - build-push-image
+
+jobs:
+  build-push-image:
+    executor: docker/machine
+    steps:
+      - checkout
+      - docker/check
+      - docker/build:
+          image: naceflabidi/graphql-sample
+      - docker/push:
+          image: naceflabidi/graphql-sample
+      - helm/configure-kubectl
+      - helm/deploy:
+          helm_release: graphql
+          helm_chart: ./helm/graphql
