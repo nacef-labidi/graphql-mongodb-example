@@ -8,7 +8,7 @@ workflows:
   build-deploy-pipeline:
     jobs:
       - build-push-image
-      - deploy
+      - deploy:
           requires:
             - build-push-image
 
