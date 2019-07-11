@@ -27,6 +27,7 @@ jobs:
     executor: helm-deploy/default
     steps:
       - helm-deploy/configure-kubectl
+      - helm-deploy/init-helm
       - helm-deploy/deploy:
           helm_release: graphql
           helm_chart: ./helm/graphql
