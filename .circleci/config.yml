@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   docker: circleci/docker@0.5.2
-  helm-deploy: perxtech/helm-deploy@0.0.4
+  helm: circleci/helm@0.1.2
 
 workflows:
   build-deploy-pipeline:
@@ -24,11 +24,22 @@ jobs:
           image: naceflabidi/graphql-sample
 
   deploy:
-    executor: helm-deploy/default
+    executor: docker/machine
     steps:
-      - helm-deploy/configure-kubectl
-      - helm-deploy/init-helm
-      - helm-deploy/deploy:
-          helm_release: graphql
-          helm_chart: ${CIRCLE_WORKING_DIRECTORY}/helm/graphql
-          helm_values: image.tag=$CIRCLE_SHA1
+      - run:
+          name: Prepare certs
+          command: |
+            echo ${HELM_CA_DATA} | base64 -d > ./ca.pem
+            echo ${HELM_CERT_DATA} | base64 -d > ./cert.pem
+            echo ${HELM_KEY_DATA} | base64 -d > ./key.pem
+      - helm/install-helm-chart:
+          release-name: graphql
+          chart: ./helm/graphql
+          values-to-override: image.tag=$CIRCLE_SHA1
+          namespace: graphql
+          tls: true
+          tls-ca-cert: ./ca.pem
+          tls-cert: ./cert.pem
+          tls-hostname: https://35.189.123.181
+          tls-key: ./key.pem
+          tls-verify: true
